@@ -3,410 +3,303 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Controle Acadêmico v2.3 - JM ANALYTICS</title>
-    
-    <!-- Tailwind CSS -->
+    <title>Currículo Acadêmico Interativo - João Marcos Souza Pereira</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
-
-    <!-- Font Awesome para Ícones -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Professional Slate -->
+    <!-- Application Structure Plan: Redesigned into a two-column "Profile" layout. A sticky left column acts as a master profile card, holding identity and primary KPIs (Progress, Grade), making it feel like a professional summary. The right column is a single, scrollable narrative of the academic journey, with clear sections for the timeline, performance details, and investment analysis. This structure is superior for a "resume" format as it provides constant context (the profile) while the user explores the story-like details, enhancing usability and professional appeal. -->
+    <!-- Visualization & Content Choices: Progress is shown with a combined Donut Chart and central percentage text (Goal: Inform, Method: Chart.js). The timeline is a custom, highly-visual HTML/CSS component (Goal: Organize) to better narrate the journey. The Bar Chart for grades is retained but restyled (Goal: Compare). Key stats are presented with icons for quick cognitive processing. This design moves away from a purely data-driven dashboard to an interactive, professional narrative. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5;
+            background-color: #f8f9fa;
+            color: #343a40;
         }
-        .dashboard-card {
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        .chart-container {
+            position: relative;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
         }
-        .dashboard-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            transition: all 0.3s ease-in-out;
         }
-        .status-aprovado { background-color: #dcfce7; color: #166534; }
-        .status-pendente { background-color: #fef9c3; color: #854d0e; }
-        .status-reprovado { background-color: #fee2e2; color: #991b1b; }
-        .tab-button {
-            transition: all 0.3s ease;
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.07);
         }
-        .tab-button.active {
-            border-color: #2563eb;
-            color: #2563eb;
-            background-color: #eff6ff;
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 11px;
+            top: 28px;
+            width: 2px;
+            height: calc(100% - 10px);
+            background-color: #dee2e6;
         }
-        #undo-button:disabled {
-            background-color: #9ca3af;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-        /* Estilos para o Acordeão de Módulos */
-        .module-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease-in-out;
-        }
-        .module-header .fa-chevron-down {
-            transition: transform 0.3s ease;
-        }
-        .module-header.open .fa-chevron-down {
-            transform: rotate(180deg);
+         .timeline-item:last-child::before {
+            display: none;
         }
     </style>
 </head>
-<body class="p-4 sm:p-6 md:p-8">
+<body class="antialiased">
 
-    <div class="max-w-7xl mx-auto">
-        <!-- Cabeçalho -->
-        <header class="mb-6">
-            <h1 class="text-4xl font-extrabold text-gray-800">Painel de Controle Acadêmico <span class="text-blue-600">v2.3</span></h1>
-            <p class="text-lg text-gray-500">Desenvolvido por JM ANALYTICS para João Marcos Souza Pereira</p>
-        </header>
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <div class="lg:grid lg:grid-cols-12 lg:gap-8">
 
-        <!-- Navegação em Abas -->
-        <div class="mb-6 border-b border-gray-200">
-            <nav class="flex space-x-4" aria-label="Tabs">
-                <button id="tab-academico" class="tab-button active font-semibold px-4 py-2 rounded-t-lg border-b-2 border-transparent hover:border-gray-300 hover:text-gray-600">
-                    <i class="fas fa-graduation-cap mr-2"></i>Visão Geral Acadêmica
-                </button>
-                <button id="tab-financeiro" class="tab-button font-semibold px-4 py-2 rounded-t-lg border-b-2 border-transparent hover:border-gray-300 hover:text-gray-600">
-                    <i class="fas fa-dollar-sign mr-2"></i>Análise Financeira
-                </button>
-            </nav>
+            <!-- Left Column: Profile Card -->
+            <aside class="lg:col-span-4 lg:sticky lg:top-8 self-start">
+                <div class="card p-6">
+                    <div class="text-center mb-6">
+                        <div class="w-24 h-24 rounded-full bg-gray-200 mx-auto mb-4 flex items-center justify-center text-3xl font-bold text-gray-500">
+                            JM
+                        </div>
+                        <h1 class="text-2xl font-bold text-gray-800">João Marcos S. Pereira</h1>
+                        <p class="text-md text-gray-500">C.S.T. em Banco de Dados</p>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-500 mb-2">Progresso Geral</h3>
+                            <div class="chart-container h-48 relative">
+                                <canvas id="progressChart"></canvas>
+                                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                    <span class="text-3xl font-bold text-gray-800" id="progressText"></span>
+                                    <span class="text-xs text-gray-500">concluído</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-gray-200 pt-4">
+                             <h3 class="text-sm font-medium text-gray-500 mb-2">Indicadores Chave</h3>
+                             <div class="space-y-3">
+                                 <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-3 text-sm">🎓</div>
+                                    <div>
+                                        <p class="font-semibold text-gray-700">Média Geral</p>
+                                        <p class="text-lg font-bold">8.12</p>
+                                    </div>
+                                 </div>
+                                 <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center mr-3 text-sm">🗓️</div>
+                                     <div>
+                                        <p class="font-semibold text-gray-700">Conclusão Prevista</p>
+                                        <p class="text-lg font-bold">Agosto 2026</p>
+                                    </div>
+                                 </div>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Right Column: Details -->
+            <main class="lg:col-span-8 mt-8 lg:mt-0">
+                <div class="space-y-8">
+                    <!-- Section: Academic Journey -->
+                    <section id="journey" class="card p-6">
+                        <h2 class="text-xl font-bold text-gray-800 mb-1">Jornada Acadêmica</h2>
+                        <p class="text-sm text-gray-500 mb-6">Uma visão cronológica do seu avanço, módulo a módulo.</p>
+                        <div class="relative">
+                            <div class="timeline-item relative pl-8 pb-8">
+                                <div class="absolute left-0 top-1 h-6 w-6 rounded-full bg-blue-500 border-4 border-white"></div>
+                                <p class="font-semibold text-gray-700">Início da Formação</p>
+                                <p class="text-xs text-gray-400 mb-1">22 de Novembro, 2023</p>
+                                <span class="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">Marco Zero</span>
+                            </div>
+                            <div class="timeline-item relative pl-8 pb-8">
+                                <div class="absolute left-0 top-1 h-6 w-6 rounded-full bg-green-500 border-4 border-white"></div>
+                                <p class="font-semibold text-gray-700">Séries 1 a 6 Concluídas</p>
+                                <p class="text-xs text-gray-400 mb-1">De 2024 a meados de 2025</p>
+                                <p class="text-sm text-gray-600">Fundamentos sólidos em Big Data, Segurança, Bancos de Dados Relacionais e Programação.</p>
+                            </div>
+                             <div class="timeline-item relative pl-8 pb-8">
+                                <div class="absolute left-0 top-1 h-6 w-6 rounded-full bg-yellow-500 border-4 border-white animate-pulse"></div>
+                                <p class="font-semibold text-gray-700">Posição Atual: Série 7</p>
+                                <p class="text-xs text-gray-400 mb-1">Setembro de 2025</p>
+                                <p class="text-sm text-gray-600">Aprofundando em Banco de Dados NoSQL e Engenharia de Software.</p>
+                            </div>
+                             <div class="timeline-item relative pl-8 pb-8">
+                                <div class="absolute left-0 top-1 h-6 w-6 rounded-full bg-gray-400 border-4 border-white"></div>
+                                <p class="font-semibold text-gray-700">Próximas Séries (8-10)</p>
+                                 <p class="text-xs text-gray-400 mb-1">Final de 2025 até meados de 2026</p>
+                                <p class="text-sm text-gray-600">Foco em tecnologias de ponta: Visualização de Dados, Cloud, Data Warehouse e I.A.</p>
+                            </div>
+                             <div class="timeline-item relative pl-8">
+                                <div class="absolute left-0 top-1 h-6 w-6 rounded-full bg-blue-500 border-4 border-white"></div>
+                                <p class="font-semibold text-gray-700">Formatura</p>
+                                <p class="text-xs text-gray-400 mb-1">Agosto de 2026</p>
+                                <span class="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">Objetivo Final</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Section: Performance -->
+                    <section id="performance" class="card p-6">
+                        <h2 class="text-xl font-bold text-gray-800 mb-1">Desempenho Detalhado</h2>
+                        <p class="text-sm text-gray-500 mb-6">Análise quantitativa das notas obtidas nas disciplinas concluídas.</p>
+                        <div class="chart-container h-80 max-h-96">
+                            <canvas id="gradesChart"></canvas>
+                        </div>
+                    </section>
+
+                    <!-- Section: Investment -->
+                    <section id="investment" class="card p-6">
+                        <h2 class="text-xl font-bold text-gray-800 mb-1">Análise de Investimento</h2>
+                        <p class="text-sm text-gray-500 mb-6">Visão financeira do seu projeto de formação profissional.</p>
+                        <div class="space-y-4">
+                           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-gray-50 rounded-lg">
+                               <div>
+                                   <p class="font-semibold text-gray-700">Custo Total da Formação</p>
+                                   <p class="text-xs text-gray-500">Soma do valor realizado e projetado</p>
+                               </div>
+                               <p class="text-2xl font-bold text-gray-800 mt-2 sm:mt-0">R$ 7.247,13</p>
+                           </div>
+                           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                               <div class="p-4 bg-green-50 rounded-lg">
+                                   <p class="font-semibold text-green-800">Investimento Realizado</p>
+                                   <p class="text-xl font-bold text-green-900">R$ 4.611,81</p>
+                               </div>
+                               <div class="p-4 bg-blue-50 rounded-lg">
+                                   <p class="font-semibold text-blue-800">Investimento Projetado</p>
+                                   <p class="text-xl font-bold text-blue-900">R$ 2.635,32</p>
+                               </div>
+                           </div>
+                        </div>
+                    </section>
+                </div>
+            </main>
+
         </div>
-
-        <!-- Conteúdo das Abas -->
-        <main>
-            <!-- ABA ACADÊMICA -->
-            <div id="content-academico">
-                <!-- Seção de Alertas -->
-                <div id="alert-section" class="mb-6"></div>
-
-                <!-- Grid Principal do Dashboard -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                    <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg dashboard-card">
-                        <h2 class="text-xl font-bold text-gray-700 mb-4">Dados do Aluno</h2>
-                        <div id="student-info" class="space-y-2 text-gray-600"></div>
-                    </div>
-                    <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg dashboard-card flex flex-col items-center justify-center">
-                        <h2 class="text-xl font-bold text-gray-700 mb-4 text-center">Progresso Geral do Curso</h2>
-                        <div class="w-full max-w-sm mx-auto"><canvas id="progressChart"></canvas></div>
-                    </div>
-                </div>
-                
-                <!-- Grid de Indicadores -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    <div id="forecast-card" class="md:col-span-1 bg-blue-900 text-white p-6 rounded-xl shadow-lg dashboard-card"></div>
-                    <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card">
-                        <h3 class="font-bold text-gray-700">Atividades de Extensão</h3>
-                        <div class="w-full bg-gray-200 rounded-full h-4 mt-2"><div id="extension-progress-bar" class="bg-blue-600 h-4 rounded-full"></div></div>
-                        <p id="extension-progress-text" class="text-right text-sm mt-1 font-semibold text-gray-600"></p>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card">
-                        <h3 class="font-bold text-gray-700">Atividades Complementares</h3>
-                        <div class="w-full bg-gray-200 rounded-full h-4 mt-2"><div id="complementary-progress-bar" class="bg-green-600 h-4 rounded-full"></div></div>
-                        <p id="complementary-progress-text" class="text-right text-sm mt-1 font-semibold text-gray-600"></p>
-                    </div>
-                </div>
-
-                <!-- Visualização de Disciplinas por Módulos -->
-                <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold text-gray-700">Disciplinas por Módulo</h2>
-                        <div id="undo-button-container"></div>
-                    </div>
-                    <div id="modules-container" class="space-y-3">
-                        <!-- Módulos serão injetados aqui pelo JavaScript -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- ABA FINANCEIRA -->
-            <div id="content-financeiro" class="hidden">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    <div id="total-cost-card" class="bg-white p-6 rounded-xl shadow-lg dashboard-card"></div>
-                    <div id="paid-amount-card" class="bg-white p-6 rounded-xl shadow-lg dashboard-card"></div>
-                    <div id="remaining-balance-card" class="bg-white p-6 rounded-xl shadow-lg dashboard-card"></div>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-lg dashboard-card">
-                    <h2 class="text-xl font-bold text-gray-700 mb-4"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>Insights para Planejamento Financeiro</h2>
-                    <div id="financial-insights" class="space-y-4 text-gray-600"></div>
-                </div>
-            </div>
-        </main>
-        
-        <footer class="text-center mt-8 text-sm text-gray-500">
-            <p>&copy; <span id="currentYear"></span> JM ANALYTICS. Todos os direitos reservados.</p>
+        <footer class="text-center mt-12 text-xs text-gray-500">
+            <p>Currículo Interativo gerado pela IA do João para JM Analytics.</p>
+            <p>Última atualização: 02 de Setembro de 2025.</p>
         </footer>
     </div>
 
 <script>
-// ===================================================================================
-// BANCO DE DADOS E CONFIGURAÇÕES
-// ===================================================================================
-const academicData = {
-    student: { name: "João Marcos Souza Pereira", course: "Superior de Tecnologia em Banco de Dados", university: "UNICESUMAR", ra: "20245166891", entryDate: new Date('2024-01-01') },
-    course: { durationMonths: 30, totalDisciplines: 26 },
-    progress: { extensionHours: { completed: 75, total: 218 }, complementaryHours: { completed: 94, total: 40 } },
-    financial: { monthlyFee: 220, reprovalCost: 220 },
-    currentDate: new Date('2025-07-30'), 
-    disciplines: [
-        { name: "Mentalidade Criativa e Empreendedora", series: 5, status: "Aprovado" }, { name: "Processos de Negócio", series: 5, status: "Aprovado" },
-        { name: "Governança em Tecnologia da Informação", series: 4, status: "Aprovado" }, { name: "Linguagem de Programação", series: 4, status: "Aprovado" },
-        { name: "Banco de Dados", series: 3, status: "Aprovado" }, { name: "Produção do Conhecimento Científico, Tecnológico e Disrupção", series: 3, status: "Aprovado" },
-        { name: "GO - Projeto de Vida", series: 2, status: "Aprovado" }, { name: "Matemática Aplicada à Computação", series: 2, status: "Aprovado" },
-        { name: "Fundamentos de Big Data", series: 1, status: "Aprovado" }, { name: "Segurança e Auditoria de Sistemas", series: 1, status: "Aprovado" },
-        { name: "Administração de Banco de Dados", series: 6, status: "Reprovado" }, { name: "Programação de Banco de Dados", series: 7, status: "Pendente" },
-        { name: "Imersão Profissional: Projeto de Banco de Dados não Relacional", series: 7, status: "Pendente" }, { name: "Banco de Dados NoSQL", series: 7, status: "Pendente" },
-        { name: "Engenharia de Software", series: 7, status: "Pendente" }, { name: "Gestão de Projetos Tecnológicos", series: 8, status: "Pendente" },
-        { name: "Imersão Profissional: Visualização de Dados", series: 8, status: "Pendente" }, { name: "Visualização de Dados", series: 8, status: "Pendente" },
-        { name: "Cloud Computing", series: 9, status: "Pendente" }, { name: "Data Warehouse", series: 9, status: "Pendente" },
-        { name: "Estudo Contemporâneo e Transversal: Autonomia Intelectual, Relação de Consumo e Sustentabilidade", series: 9, status: "Pendente" },
-        { name: "Imersão Profissional: Projeto de Data Warehouse", series: 9, status: "Pendente" }, { name: "Estudo Contemporâneo e Transversal: Relações Étnico-Raciais, Cultura e Direitos Humanos", series: 10, status: "Pendente" },
-        { name: "Imersão Profissional: Projeto Prático de Banco de Dados", series: 10, status: "Pendente" }, { name: "Inteligência Artificial", series: 10, status: "Pendente" },
-        { name: "Processamento Paralelo e Distribuído em Banco de Dados", series: 10, status: "Pendente" },
-    ]
-};
+    document.addEventListener('DOMContentLoaded', () => {
+        const academicData = {
+            totalSubjects: 27,
+            completedSubjects: 12,
+            inProgressSubjects: 3,
+            grades: [
+                { subject: 'Mente. Criativa', grade: 7.60 },
+                { subject: 'Processos de Negócio', grade: 7.40 },
+                { subject: 'Governança em T.I.', grade: 8.30 },
+                { subject: 'Linguagem de Prog.', grade: 8.20 },
+                { subject: 'Banco de Dados', grade: 8.40 },
+                { subject: 'Prod. do Conhecimento', grade: 7.80 },
+                { subject: 'GO - Projeto de Vida', grade: 10.00 },
+                { subject: 'Matemática Aplicada', grade: 7.90 },
+                { subject: 'Fundamentos de Big Data', grade: 7.40 },
+                { subject: 'Segurança e Auditoria', grade: 8.20 },
+            ]
+        };
 
-let progressChartInstance = null;
-let historyStack = [];
+        const chartColors = {
+            completed: '#3b82f6', 
+            inProgress: '#f59e0b', 
+            pending: '#d1d5db', 
+            barDefault: '#6b7280',
+            barHover: '#374151'
+        };
 
-// ===================================================================================
-// LÓGICA DA APLICAÇÃO
-// ===================================================================================
-document.addEventListener('DOMContentLoaded', () => {
-    setupTabs();
-    renderAll();
-});
-
-function renderAll() {
-    renderStudentInfo();
-    renderProgressBars();
-    renderModules();
-    renderProgressChart();
-    renderAlerts();
-    renderForecast();
-    renderFinancials();
-    renderFooter();
-    renderUndoButton();
-}
-
-function setupTabs() {
-    const tabAcademicoBtn = document.getElementById('tab-academico');
-    const tabFinanceiroBtn = document.getElementById('tab-financeiro');
-    const contentAcademico = document.getElementById('content-academico');
-    const contentFinanceiro = document.getElementById('content-financeiro');
-    tabAcademicoBtn.addEventListener('click', () => {
-        tabAcademicoBtn.classList.add('active');
-        tabFinanceiroBtn.classList.remove('active');
-        contentAcademico.classList.remove('hidden');
-        contentFinanceiro.classList.add('hidden');
-    });
-    tabFinanceiroBtn.addEventListener('click', () => {
-        tabFinanceiroBtn.classList.add('active');
-        tabAcademicoBtn.classList.remove('active');
-        contentFinanceiro.classList.remove('hidden');
-        contentAcademico.classList.add('hidden');
-    });
-}
-
-// ATUALIZADO: Adicionada legenda de duração do módulo
-function renderModules() {
-    const container = document.getElementById('modules-container');
-    container.innerHTML = ''; 
-
-    const disciplinesByModule = academicData.disciplines.reduce((acc, d) => {
-        const module = d.series;
-        if (!acc[module]) acc[module] = [];
-        acc[module].push(d);
-        return acc;
-    }, {});
-
-    const totalModules = Object.keys(disciplinesByModule).length;
-    const moduleDuration = academicData.course.durationMonths / totalModules;
-
-    Object.keys(disciplinesByModule).sort((a, b) => a - b).forEach(moduleNumber => {
-        const disciplines = disciplinesByModule[moduleNumber];
-        const approvedCount = disciplines.filter(d => d.status === 'Aprovado').length;
-        const totalCount = disciplines.length;
-        const isModuleComplete = approvedCount === totalCount;
-        
-        let moduleStatusHTML = `<span class="text-sm font-medium text-gray-500">${approvedCount} / ${totalCount} Aprovadas</span>`;
-        if (isModuleComplete) {
-            moduleStatusHTML = `<span class="text-sm font-semibold text-green-600"><i class="fas fa-check-circle mr-1"></i>Concluído</span>`;
+        function wrapText(text, maxWidth) {
+            if (text.length <= maxWidth) return text;
+            return text.substring(0, maxWidth) + '...';
         }
-        
-        const moduleElement = document.createElement('div');
-        moduleElement.className = 'border border-gray-200 rounded-lg overflow-hidden';
-        moduleElement.innerHTML = `
-            <button class="module-header w-full p-4 text-left bg-gray-50 hover:bg-gray-100 transition-colors">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <span class="text-lg font-bold text-gray-800">Módulo ${moduleNumber}</span>
-                        <span class="block text-xs text-gray-500 font-normal">Duração Estimada: ${moduleDuration} meses</span>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        ${moduleStatusHTML}
-                        <i class="fas fa-chevron-down text-gray-500"></i>
-                    </div>
-                </div>
-            </button>
-            <div class="module-content">
-                <div class="p-4">
-                    <table class="min-w-full">
-                        <tbody class="divide-y divide-gray-200">
-                            ${disciplines.map(d => `
-                                <tr class="hover:bg-gray-50">
-                                    <td class="py-3 pr-4 whitespace-nowrap text-sm text-gray-800">${d.name}</td>
-                                    <td class="py-3 px-4 whitespace-nowrap text-sm">
-                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${ { 'Aprovado': 'status-aprovado', 'Pendente': 'status-pendente', 'Reprovado': 'status-reprovado' }[d.status]}">${d.status}</span>
-                                    </td>
-                                    <td class="py-3 pl-4 whitespace-nowrap text-sm text-center w-32">
-                                        ${(d.status !== 'Aprovado') ? `<button onclick="updateDisciplineStatus('${d.name}', 'Aprovado')" class="bg-green-500 text-white px-3 py-1.5 rounded-md hover:bg-green-600 transition-colors text-xs font-semibold w-28"><i class="fas fa-check-circle mr-1"></i>Aprovar</button>` : `<div class="w-28 h-9"></div>`}
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        `;
-        container.appendChild(moduleElement);
-    });
 
-    container.querySelectorAll('.module-header').forEach(header => {
-        header.addEventListener('click', () => {
-            header.classList.toggle('open');
-            const content = header.nextElementSibling;
-            if (content.style.maxHeight) {
-                content.style.maxHeight = null;
-            } else {
-                content.style.maxHeight = content.scrollHeight + "px";
+        const completedPercentage = ((academicData.completedSubjects + academicData.inProgressSubjects) / academicData.totalSubjects * 100).toFixed(1);
+        document.getElementById('progressText').textContent = `${completedPercentage}%`;
+
+        const progressCtx = document.getElementById('progressChart').getContext('2d');
+        new Chart(progressCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Concluídas', 'Cursando', 'Pendentes'],
+                datasets: [{
+                    data: [
+                        academicData.completedSubjects,
+                        academicData.inProgressSubjects,
+                        academicData.totalSubjects - academicData.completedSubjects - academicData.inProgressSubjects
+                    ],
+                    backgroundColor: [chartColors.completed, chartColors.inProgress, chartColors.pending],
+                    borderColor: '#ffffff',
+                    borderWidth: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '80%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: '#1f2937',
+                        titleFont: { weight: 'bold' },
+                        bodyFont: { weight: 'normal' },
+                        padding: 10,
+                        cornerRadius: 6,
+                    }
+                }
+            }
+        });
+
+        const gradesCtx = document.getElementById('gradesChart').getContext('2d');
+        new Chart(gradesCtx, {
+            type: 'bar',
+            data: {
+                labels: academicData.grades.map(g => wrapText(g.subject, 16)),
+                datasets: [{
+                    label: 'Nota Final',
+                    data: academicData.grades.map(g => g.grade),
+                    backgroundColor: chartColors.barDefault,
+                    hoverBackgroundColor: chartColors.barHover,
+                    borderRadius: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 10,
+                        grid: { color: '#e5e7eb' },
+                        ticks: { color: '#6b7280' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#6b7280' }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                     tooltip: {
+                        enabled: true,
+                        backgroundColor: '#1f2937',
+                        padding: 10,
+                        cornerRadius: 6,
+                        callbacks: {
+                            title: (context) => academicData.grades[context[0].dataIndex].subject
+                        }
+                    }
+                }
             }
         });
     });
-}
-
-function updateDisciplineStatus(disciplineName, newStatus) {
-    historyStack.push(JSON.parse(JSON.stringify(academicData.disciplines)));
-    const discipline = academicData.disciplines.find(d => d.name === disciplineName);
-    if (discipline) {
-        discipline.status = newStatus;
-        renderAll();
-    }
-}
-
-function undoLastAction() {
-    if (historyStack.length > 0) {
-        academicData.disciplines = historyStack.pop();
-        renderAll();
-    }
-}
-
-function renderUndoButton() {
-    const container = document.getElementById('undo-button-container');
-    const hasHistory = historyStack.length > 0;
-    container.innerHTML = `<button id="undo-button" onclick="undoLastAction()" class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-all text-sm font-semibold" ${!hasHistory ? 'disabled' : ''}><i class="fas fa-undo mr-2"></i>Desfazer Ação</button>`;
-}
-
-// --- Funções que permanecem majoritariamente inalteradas ---
-
-function renderStudentInfo() {
-    const info = academicData.student;
-    document.getElementById('student-info').innerHTML = `<p><strong>Nome:</strong> ${info.name}</p><p><strong>Curso:</strong> ${info.course}</p><p><strong>Universidade:</strong> ${info.university}</p><p><strong>Ingresso:</strong> ${info.entryDate.toLocaleDateString('pt-BR', { year: 'numeric', month: 'long' })}</p>`;
-}
-
-function renderProgressBars() {
-    const ext = academicData.progress.extensionHours;
-    const extPercentage = Math.min((ext.completed / ext.total) * 100, 100);
-    document.getElementById('extension-progress-bar').style.width = `${extPercentage}%`;
-    document.getElementById('extension-progress-text').textContent = `${ext.completed}h / ${ext.total}h`;
-    const comp = academicData.progress.complementaryHours;
-    const compPercentage = Math.min((comp.completed / comp.total) * 100, 100);
-    document.getElementById('complementary-progress-bar').style.width = `${compPercentage}%`;
-    document.getElementById('complementary-progress-text').textContent = `${comp.completed}h / ${comp.total}h`;
-}
-
-function renderProgressChart() {
-    if (progressChartInstance) progressChartInstance.destroy();
-    const ctx = document.getElementById('progressChart').getContext('2d');
-    const approvedCount = academicData.disciplines.filter(d => d.status === 'Aprovado').length;
-    const pendingCount = academicData.disciplines.filter(d => d.status === 'Pendente').length;
-    const reprovedCount = academicData.disciplines.filter(d => d.status === 'Reprovado').length;
-    progressChartInstance = new Chart(ctx, {
-        type: 'doughnut',
-        data: { labels: ['Aprovadas', 'Pendentes', 'Reprovadas'], datasets: [{ data: [approvedCount, pendingCount, reprovedCount], backgroundColor: ['#22c55e', '#f59e0b', '#ef4444'], borderColor: '#ffffff', borderWidth: 4, hoverOffset: 8 }] },
-        options: {
-            responsive: true, maintainAspectRatio: false, cutout: '70%',
-            plugins: {
-                legend: { position: 'bottom', labels: { font: { size: 14, family: 'Inter' }, padding: 20 } },
-                tooltip: { callbacks: { label: (c) => ` ${c.label}: ${c.parsed} (${((c.parsed / c.dataset.data.reduce((a, b) => a + b, 0)) * 100).toFixed(1)}%)` } }
-            }
-        }
-    });
-}
-
-function renderAlerts() {
-    const reprovedDiscipline = academicData.disciplines.find(d => d.status === 'Reprovado');
-    const alertSection = document.getElementById('alert-section');
-    alertSection.innerHTML = '';
-    if (reprovedDiscipline) {
-        alertSection.innerHTML = `<div class="bg-red-100 border-l-4 border-red-500 text-red-800 p-4 rounded-lg shadow-md" role="alert"><div class="flex"><div class="py-1"><i class="fas fa-exclamation-triangle text-red-500 h-6 w-6 mr-4"></i></div><div><p class="font-bold">Ponto de Atenção Crítico!</p><p class="text-sm">A reprovação em <strong>"${reprovedDiscipline.name}"</strong> impacta sua previsão de formatura e custos. Verifique o plano de recuperação.</p></div></div></div>`;
-    }
-}
-
-function renderForecast() {
-    const { originalDate, adjustedDate, delayMonths } = calculateForecast();
-    const card = document.getElementById('forecast-card');
-    let forecastHTML = `<h3 class="text-xl font-bold mb-2"><i class="fas fa-calendar-alt mr-2"></i>Previsão de Conclusão</h3><div class="text-center my-4"><p class="text-sm text-blue-200">Previsão Ajustada</p><p class="text-4xl font-black tracking-tight">${adjustedDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase()}</p></div>`;
-    if (delayMonths > 0) {
-        forecastHTML += `<p class="text-xs text-blue-300 text-center"><i class="fas fa-info-circle mr-1"></i>A data foi ajustada em ${delayMonths} mes(es) devido a pendências.</p><p class="text-xs text-blue-300 text-center mt-1">Previsão original: ${originalDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}</p>`;
-    } else {
-        forecastHTML += `<p class="text-sm text-green-300 text-center font-semibold"><i class="fas fa-check-circle mr-1"></i>Parabéns! Você está em dia.</p>`;
-    }
-    card.innerHTML = forecastHTML;
-}
-
-function calculateForecast() {
-    const startDate = academicData.student.entryDate;
-    const duration = academicData.course.durationMonths;
-    const originalDate = new Date(startDate);
-    originalDate.setMonth(originalDate.getMonth() + duration);
-    const reprovedCount = academicData.disciplines.filter(d => d.status === 'Reprovado').length;
-    const delayMonths = reprovedCount * 3;
-    const adjustedDate = new Date(originalDate);
-    adjustedDate.setMonth(adjustedDate.getMonth() + delayMonths);
-    return { originalDate, adjustedDate, delayMonths };
-}
-
-function renderFinancials() {
-    const { monthlyFee, reprovalCost } = academicData.financial;
-    const { durationMonths } = academicData.course;
-    const monthsDiff = (academicData.currentDate.getFullYear() - academicData.student.entryDate.getFullYear()) * 12 + (academicData.currentDate.getMonth() - academicData.student.entryDate.getMonth());
-    const monthsPaid = Math.max(0, monthsDiff);
-    const amountPaid = monthsPaid * monthlyFee;
-    const reprovedCount = academicData.disciplines.filter(d => d.status === 'Reprovado').length;
-    const totalReprovalCost = reprovedCount * reprovalCost;
-    const totalCourseCost = (durationMonths * monthlyFee) + totalReprovalCost;
-    const remainingBalance = totalCourseCost - amountPaid;
-    const formatCurrency = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    document.getElementById('total-cost-card').innerHTML = `<h3 class="font-bold text-gray-700">Custo Total Previsto</h3><p class="text-3xl font-extrabold text-red-600 mt-2">${formatCurrency(totalCourseCost)}</p><p class="text-sm text-gray-500 mt-1">Inclui ${formatCurrency(totalReprovalCost)} de custos com pendências.</p>`;
-    document.getElementById('paid-amount-card').innerHTML = `<h3 class="font-bold text-gray-700">Valor Pago (Estimado)</h3><p class="text-3xl font-extrabold text-green-600 mt-2">${formatCurrency(amountPaid)}</p><p class="text-sm text-gray-500 mt-1">Referente a ${monthsPaid} mensalidades até ${academicData.currentDate.toLocaleDateString('pt-BR', {month:'long'})}.</p>`;
-    document.getElementById('remaining-balance-card').innerHTML = `<h3 class="font-bold text-gray-700">Saldo Devedor</h3><p class="text-3xl font-extrabold text-blue-600 mt-2">${formatCurrency(remainingBalance)}</p><p class="text-sm text-gray-500 mt-1">Valor restante para quitação do curso.</p>`;
-    document.getElementById('financial-insights').innerHTML = `<div class="p-4 bg-blue-50 rounded-lg"><h4 class="font-bold text-blue-800">Impacto da Reprovação</h4><p class="text-sm">Cada disciplina reprovada adiciona <strong>${formatCurrency(reprovalCost)}</strong> ao seu custo total (valor estimado). Manter-se em dia é a forma mais eficaz de economizar.</p></div><div class="p-4 bg-green-50 rounded-lg"><h4 class="font-bold text-green-800">Planejamento Futuro</h4><p class="text-sm">Seu saldo devedor é de <strong>${formatCurrency(remainingBalance)}</strong>. Considere criar uma reserva mensal para cobrir os custos restantes.</p></div><div class="p-4 bg-yellow-50 rounded-lg"><h4 class="font-bold text-yellow-800">Análise de Cenários</h4><p class="text-sm">Use este painel para simular seu avanço e planejar os próximos passos.</p></div>`;
-}
-
-function renderFooter() {
-    document.getElementById('currentYear').textContent = new Date().getFullYear();
-}
 </script>
 
 </body>
 </html>
+
